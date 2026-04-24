@@ -80,6 +80,43 @@ tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
+<div id="login-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080808;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid #222;border-radius:8px;padding:40px;width:320px;text-align:center">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:8px;color:#C9A84C;margin-bottom:4px">KING</div>
+    <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.3);margin-bottom:32px">NIGHT CLUB</div>
+    <input id="pwd-input" type="password" placeholder="Mot de passe" 
+      style="width:100%;padding:12px 16px;background:#161616;border:1px solid #333;border-radius:4px;color:#E2E2E2;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px"
+      onkeydown="if(event.key==='Enter')checkPwd()">
+    <div id="pwd-error" style="color:#C0392B;font-size:12px;margin-bottom:12px;display:none">Mot de passe incorrect</div>
+    <button onclick="checkPwd()" 
+      style="width:100%;padding:12px;background:rgba(201,168,76,.15);border:1px solid #5A4010;border-radius:4px;color:#C9A84C;font-size:13px;letter-spacing:2px;cursor:pointer;font-family:'DM Sans',sans-serif;text-transform:uppercase">
+      Entrer
+    </button>
+  </div>
+</div>
+<script>
+var PWD = "king2026";
+function checkPwd(){
+  var v=document.getElementById("pwd-input").value;
+  if(v===PWD){
+    document.getElementById("login-screen").style.display="none";
+    localStorage.setItem("king_auth","1");
+  } else {
+    document.getElementById("pwd-error").style.display="block";
+    document.getElementById("pwd-input").value="";
+    document.getElementById("pwd-input").focus();
+  }
+}
+if(localStorage.getItem("king_auth")==="1"){
+  window.addEventListener("DOMContentLoaded",function(){
+    document.getElementById("login-screen").style.display="none";
+  });
+}
+window.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("pwd-input").focus();
+});
+</script>
+
 <div class="lbar" id="lbar"></div>
 <header>
   <div class="logo">KING<small>NIGHT CLUB</small></div>
@@ -124,6 +161,7 @@ tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
   <div class="tc"><div class="th"><strong>Detail par Zone et Jour</strong></div>
     <div class="ts"><table><thead><tr><th>Zone</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th><th>Dim</th><th>TOTAL</th></tr></thead><tbody id="v-tb"></tbody></table></div>
   </div>
+  <div id="v-jour-cards"></div>
 </div>
 <div class="sec" id="paiements">
   <div class="kg" id="p-kg"></div>
@@ -144,15 +182,13 @@ tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
     <div class="cc"><div class="ct"><strong>Repartition</strong></div><div class="cw t"><canvas id="c-df"></canvas></div></div>
     <div class="cc"><div class="ct"><strong>Depenses Journalieres</strong></div><div class="cw t"><canvas id="c-dj"></canvas></div></div>
   </div>
+  <div id="d-recap"></div>
   <div class="tc"><div class="th"><strong>Salaires et Charges</strong></div>
-    <div class="ts"><table><thead><tr><th>Employe</th><th>Avance</th><th>Salaire</th><th>IBS</th><th>Boutique</th><th>Divers</th></tr></thead><tbody id="d-sal"></tbody></table></div>
+    <div class="ts"><table><thead><tr><th>Employe</th><th>Avance</th><th>Salaire</th><th>IBS</th><th>Boutique</th><th>STAPP</th><th>Le Bon Coin</th><th>Glacons</th><th>Loyer</th><th>Divers</th></tr></thead><tbody id="d-sal"></tbody></table></div>
   </div>
-  <div class="ws">
-    <button class="wb on" onclick="showDW(0,this)">Dep. Jour 07/04</button>
-    <button class="wb" onclick="showDW(1,this)">Dep. Jour 14/04</button>
-  </div>
-  <div class="wp on" id="dw-0"></div>
-  <div class="wp" id="dw-1"></div>
+  <div id="d-divers"></div>
+  <div id="dw-0" style="display:none"></div>
+  <div id="dw-1" style="display:none"></div>
 </div>
 <div class="sec" id="coffre">
   <div class="kg" id="co-kg"></div>
@@ -184,7 +220,7 @@ var API1 = "https://script.google.com/macros/s/AKfycbxf17Lebe2qqJrUkUPoLmwZZax-D
 var API2 = "https://script.google.com/macros/s/AKfycbyZT2rOnpOddZAHxlEVaHsKt1RefuxrR5QsfaIYh0BSbdBDZlbuOI5rpwkv-UlTCpNu/exec?";
 var FILE_W21 = "1oBP0vWfXPi_Y0mUTY_8uOcKYjCQHh5fNKfA37-rxm70";
 var SHEETS = {"w07": "07.04.26", "w14": "14.04.26", "w28": "28.04.26", "dep": "DEPENSES", "bilan": "BILAN", "coffre": "ENTREE SORTIE COFFRE", "credits": "CREDITS"};
-var D = {"weeks":{"w07":{"barBas":[0,630500,598000,653000,470500,1032000,290000],"barVip":[0,538000,531000,0,861000,1912000,530000],"entree":[0,0,0,0,645000,1205000,0],"totalGeneral":9896000,"totalCash":5439000,"totalCB":703000,"totalWave":3133000,"totalOM":621000,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[{"lbl":"Securitier","val":27000},{"lbl":"Serveuse","val":5000},{"lbl":"Boutique Eau","val":2000},{"lbl":"Dim","val":1500},{"lbl":"Chicha CB","val":10000},{"lbl":"PB Wave","val":3000},{"lbl":"Balai","val":2500},{"lbl":"Eva","val":7000},{"lbl":"Zeyna","val":5000},{"lbl":"Coumba PB Wave","val":6000},{"lbl":"Cherif","val":5000},{"lbl":"TM","val":233700}],"total":307700},"Mercredi":{"items":[{"lbl":"Securitier","val":17000},{"lbl":"Serveuse","val":5000},{"lbl":"Boutique","val":6000},{"lbl":"Taxi Monnaie","val":8000},{"lbl":"Boutique 2","val":3000},{"lbl":"Citrons+Menthes","val":16000},{"lbl":"Zeyna","val":5000},{"lbl":"Eva","val":5000},{"lbl":"Cherif","val":7000},{"lbl":"Dimitry","val":3000},{"lbl":"4M","val":225800}],"total":300800},"Jeudi":{"items":[{"lbl":"Taxi Monnaie","val":5000},{"lbl":"Dim","val":1000},{"lbl":"Chicha OM","val":40000}],"total":46000},"Vendredi":{"items":[{"lbl":"Securitier","val":320000},{"lbl":"Serveuse","val":5000},{"lbl":"Boutique","val":3000},{"lbl":"PB Wave","val":2000},{"lbl":"Coumba Wave PB","val":10000},{"lbl":"Visa PB","val":3000},{"lbl":"Eva","val":7000},{"lbl":"Zeyna","val":5000},{"lbl":"Cherif","val":5000},{"lbl":"Binetou","val":5000},{"lbl":"Khady","val":5000}],"total":370000},"Samedi":{"items":[{"lbl":"Chicha Visa","val":10000},{"lbl":"Wave Chicha","val":40000},{"lbl":"Eva","val":7000},{"lbl":"Zeyna","val":7000},{"lbl":"Cherif","val":5000},{"lbl":"Binetou","val":5000},{"lbl":"Securitier","val":49000},{"lbl":"Serveuse","val":5000},{"lbl":"BTK","val":3000},{"lbl":"Taxi Monnaie","val":5000},{"lbl":"Pile","val":2000},{"lbl":"Jack","val":112000},{"lbl":"Verre","val":49500},{"lbl":"PB OM","val":5000},{"lbl":"Khady","val":10000},{"lbl":"PB CB","val":2000}],"total":316500},"Dimanche":{"items":[{"lbl":"Secu","val":12000},{"lbl":"Chicha CB","val":10000},{"lbl":"PB Wave 3","val":10000},{"lbl":"Chicha Visa","val":10000},{"lbl":"Eva","val":7000},{"lbl":"Zeyna","val":5000},{"lbl":"Cherif","val":5000}],"total":59000}}},"w14":{"barBas":[0,402500,507000,421500,899500,1892000,396000],"barVip":[0,926000,360000,0,1563000,2523000,518000],"entree":[0,0,0,0,705000,840000,0],"totalGeneral":11953500,"totalCash":5993500,"totalCB":1295500,"totalWave":4090500,"totalOM":574000,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[{"lbl":"Securitier","val":17000},{"lbl":"Serveuse","val":5000},{"lbl":"Taxi Monnaie","val":5000},{"lbl":"Citrons+Menthe","val":14000},{"lbl":"PB Wave","val":8000},{"lbl":"Eva","val":7000},{"lbl":"Chicha Wave","val":20000},{"lbl":"Zeyna","val":5000},{"lbl":"Cherif Avance","val":20000},{"lbl":"Cherif Extra","val":5000},{"lbl":"Team Mondial","val":260000}],"total":366000},"Mercredi":{"items":[{"lbl":"Zeyna","val":7000},{"lbl":"Eva","val":5000},{"lbl":"Securitier","val":17000},{"lbl":"Serveuse","val":5000},{"lbl":"BTK","val":2000},{"lbl":"Chicha Wave","val":10000},{"lbl":"4M","val":187000}],"total":233000},"Jeudi":{"items":[{"lbl":"Taxi Monnaie","val":5000},{"lbl":"MB","val":1500},{"lbl":"Chicha CB","val":10000},{"lbl":"Chicha Wave","val":30000},{"lbl":"Pile Machine Sparks","val":10000}],"total":56500},"Vendredi":{"items":[{"lbl":"Eva","val":7000},{"lbl":"Eva PB","val":3000},{"lbl":"Binetou","val":5000},{"lbl":"Chicha Wave","val":20000},{"lbl":"Securitier","val":27000},{"lbl":"Serveuse","val":5000},{"lbl":"Taxi Monnaie","val":4000},{"lbl":"Malick Electricien","val":26000},{"lbl":"Dimitry","val":10000},{"lbl":"John","val":3000},{"lbl":"OM John","val":100000},{"lbl":"Khady","val":5000},{"lbl":"Team Mondial","val":380000}],"total":595000},"Samedi":{"items":[{"lbl":"Khady","val":10000},{"lbl":"Securitier","val":56000},{"lbl":"Serveuse","val":5000},{"lbl":"Boutique","val":2000},{"lbl":"Chicha Wave","val":20000},{"lbl":"Verre","val":49500},{"lbl":"Malick Electricien","val":15000},{"lbl":"Canon Anniversaire","val":3000},{"lbl":"Taxi Monnaie","val":5000},{"lbl":"Zeyna","val":7000},{"lbl":"Eva","val":7000},{"lbl":"Binetout","val":5000},{"lbl":"PB Wave","val":6000}],"total":190500},"Dimanche":{"items":[{"lbl":"Eva","val":7000},{"lbl":"Zeyna","val":5000},{"lbl":"Cherif","val":5000},{"lbl":"Chicha Wave","val":10000},{"lbl":"Pile DJ","val":2000},{"lbl":"Dim","val":2000},{"lbl":"Citrons+Menthe","val":16000},{"lbl":"Securitier","val":10000}],"total":57000}}},"w21":{"barBas":[0,0,0,0,0,0,0],"barVip":[0,0,0,0,0,0,0],"entree":[0,0,0,0,0,0,0],"totalGeneral":0,"totalCash":0,"totalCB":0,"totalWave":0,"totalOM":0,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":0},"Vendredi":{"items":[],"total":0},"Samedi":{"items":[],"total":0},"Dimanche":{"items":[],"total":0}}},"w28":{"barBas":[0,0,0,0,0,0,0],"barVip":[0,0,0,0,0,0,0],"entree":[0,0,0,0,0,0,0],"totalGeneral":0,"totalCash":0,"totalCB":0,"totalWave":0,"totalOM":0,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":0},"Vendredi":{"items":[],"total":0},"Samedi":{"items":[],"total":0},"Dimanche":{"items":[],"total":0}}}},"bilan":{"totalCA":21849500,"depenses":21473698,"resultat":-2522198,"depBoissons":6976102,"totalCB4":1998500,"totalWave4":7223500,"totalOM4":1195000,"totalCash4":11432500},"employees":[{"nom":"NDEYE FATOU","avance":0,"salaire":100000,"ibs":102000,"boutique":110000,"divers":50000},{"nom":"FARBA","avance":0,"salaire":150000,"ibs":90000,"boutique":10000,"divers":150000},{"nom":"MORR","avance":0,"salaire":120000,"ibs":63750,"boutique":5000,"divers":150000},{"nom":"ALBA","avance":50000,"salaire":100000,"ibs":0,"boutique":10000,"divers":11300},{"nom":"YASMINE","avance":0,"salaire":120000,"ibs":0,"boutique":4000,"divers":40000},{"nom":"PAKO","avance":65000,"salaire":55000,"ibs":0,"boutique":110000,"divers":25000},{"nom":"KEUSH","avance":180000,"salaire":70000,"ibs":0,"boutique":10000,"divers":65000},{"nom":"FATIMA","avance":0,"salaire":150000,"ibs":0,"boutique":14360,"divers":100000},{"nom":"ZEYNA","avance":0,"salaire":95000,"ibs":0,"boutique":0,"divers":100000},{"nom":"NABYA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"divers":30000},{"nom":"OMAR","avance":0,"salaire":105000,"ibs":0,"boutique":0,"divers":350000},{"nom":"FEMMME DE MENAGE","avance":0,"salaire":70000,"ibs":0,"boutique":0,"divers":100000},{"nom":"DIMITRY","avance":460000,"salaire":340000,"ibs":0,"boutique":0,"divers":280000},{"nom":"NANOU","avance":250000,"salaire":0,"ibs":0,"boutique":0,"divers":100000},{"nom":"RODRIGUE","avance":0,"salaire":200000,"ibs":0,"boutique":0,"divers":105000},{"nom":"DIOR","avance":0,"salaire":100000,"ibs":0,"boutique":0,"divers":20000},{"nom":"EKILO","avance":30000,"salaire":120000,"ibs":0,"boutique":0,"divers":150000},{"nom":"NDIAGA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"divers":200000},{"nom":"PAPIS","avance":10000,"salaire":90000,"ibs":0,"boutique":0,"divers":50000},{"nom":"JULES","avance":50000,"salaire":70000,"ibs":0,"boutique":0,"divers":112000},{"nom":"FADEL","avance":0,"salaire":500000,"ibs":0,"boutique":0,"divers":10000},{"nom":"COUMBA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"divers":150000},{"nom":"samba","avance":0,"salaire":80000,"ibs":0,"boutique":0,"divers":80000}],"dep_totals":{"avances":1095000,"salaires":4030000,"ibs":255750,"boutique":273360,"stapp":2588798,"lbc":8573490,"glacons":284000,"loyer":3000000,"divers":2468300,"totalBoissons":11975398,"totalDepenses":21473698},"sorties":[{"lbl":"YOUSSOUF","val":25000},{"lbl":"RICHARD BARMAN","val":65000},{"lbl":"DOMPERIGNON","val":100000},{"lbl":"AVANCE DIMITRY","val":375000},{"lbl":"YBY","val":350000},{"lbl":"LBC","val":1856480},{"lbl":"AVANCE RUSH","val":180000},{"lbl":"AVANCE NANOU","val":250000},{"lbl":"AVANCE PAKO","val":65000},{"lbl":"COCA COLA","val":102000},{"lbl":"CONSIGNES","val":90000},{"lbl":"AVANCE JULES","val":50000},{"lbl":"AVANCE TM","val":100000},{"lbl":"AVANCE ALBA","val":50000},{"lbl":"AVANCE PAPIS","val":10000},{"lbl":"AVANCE EKILO","val":30000},{"lbl":"YOUSSOUF","val":45000},{"lbl":"THIOF","val":80000},{"lbl":"DJ VANZ","val":150000},{"lbl":"THIOF","val":300000},{"lbl":"RICHARD BARMAN","val":80000},{"lbl":"DJ BIBA","val":30000},{"lbl":"COCA COLA","val":64000}],"cofEntree":8534500,"cofSortie":4447480,"cofRestant":4087020,"coffre_weeks":[[0,221800,455700,319500,535500,2080500,426000],[0,221500,51500,121000,807500,2893000,401000],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]],"credits":[{"date":"SAMEDI 21/03","nom":"WANE","mont":60000,"bar":"VIP","resp":"DIMITRY","avance":60000,"remb":0,"reste":0,"st":"u"},{"date":"SAMEDI 21/03","nom":"LUCIEN","mont":270000,"bar":"VIP","resp":"JOHN","avance":200000,"remb":30000,"reste":0,"st":"p"},{"date":"SAMEDI 21/03","nom":"OUSMANE","mont":77000,"bar":"VIP","resp":"JOHN&THIOF","avance":50000,"remb":0,"reste":0,"st":"u"},{"date":"DIMANCHE 22/03","nom":"BAMBA","mont":20000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":20000,"reste":0,"st":"p"},{"date":"2026-01-31 00:00:00","nom":"MENDY","mont":90000,"bar":"VIP","resp":"JOHN&THIOF","avance":0,"remb":90000,"reste":0,"st":"p"},{"date":"","nom":"THIOF","mont":120000,"bar":"VIP","resp":"THIOF","avance":0,"remb":120000,"reste":0,"st":"p"},{"date":"2026-03-27 00:00:00","nom":"WANE","mont":140000,"bar":"VIP","resp":"dimitry","avance":100000,"remb":0,"reste":0,"st":"u"},{"date":"2026-03-25 00:00:00","nom":"NOREYNI","mont":7000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":7000,"reste":0,"st":"p"},{"date":"2026-03-27 00:00:00","nom":"ROIDRIGUE","mont":42000,"bar":"BAR DU BAS","resp":"","avance":0,"remb":42000,"reste":0,"st":"p"},{"date":"2026-03-28 00:00:00","nom":"baby face","mont":222000,"bar":"VIP","resp":"DIMITRY","avance":80000,"remb":142000,"reste":0,"st":"p"},{"date":"2026-03-29 00:00:00","nom":"diasse","mont":60000,"bar":"VIP","resp":"john","avance":0,"remb":60000,"reste":0,"st":"p"},{"date":"","nom":"PAPE SAMBA","mont":70000,"bar":"VIP","resp":"FADEL","avance":70000,"remb":0,"reste":0,"st":"u"},{"date":"2026-04-02 00:00:00","nom":"ALYNOS","mont":60000,"bar":"BAR DU BAS","resp":"DIMITRY","avance":0,"remb":60000,"reste":0,"st":"p"},{"date":"2026-04-02 00:00:00","nom":"OUSMANE","mont":8000,"bar":"BAR DU BAS","resp":"","avance":8000,"remb":0,"reste":0,"st":"u"},{"date":"2026-04-04 00:00:00","nom":"DOUDOUNE","mont":25000,"bar":"VIP","resp":"","avance":0,"remb":25000,"reste":0,"st":"p"},{"date":"2026-04-04 00:00:00","nom":"diasse","mont":94000,"bar":"VIP","resp":"","avance":0,"remb":94000,"reste":0,"st":"p"},{"date":"2026-04-03 00:00:00","nom":"WANE","mont":60000,"bar":"VIP","resp":"DIMITRY","avance":0,"remb":60000,"reste":0,"st":"p"},{"date":"2026-04-04 00:00:00","nom":"GABY","mont":60000,"bar":"VIP","resp":"JOHN","avance":60000,"remb":0,"reste":0,"st":"u"},{"date":"","nom":"XXXXX","mont":50000,"bar":"","resp":"","avance":50000,"remb":0,"reste":0,"st":"u"},{"date":"2026-04-10 00:00:00","nom":"NOREYNI","mont":101000,"bar":"VIP","resp":"FADEL","avance":0,"remb":101000,"reste":0,"st":"p"},{"date":"2026-04-11 00:00:00","nom":"ALFONSE","mont":70000,"bar":"VIP","resp":"DIMITRY","avance":30000,"remb":40000,"reste":0,"st":"p"},{"date":"2026-04-11 00:00:00","nom":"ABDOU MBENGUE","mont":170000,"bar":"VIP","resp":"JOHN","avance":0,"remb":170000,"reste":0,"st":"p"},{"date":"2026-04-14 00:00:00","nom":"SANTA","mont":10000,"bar":"VIP","resp":"","avance":0,"remb":10000,"reste":0,"st":"p"},{"date":"","nom":"ALFONSE","mont":65000,"bar":"VIP","resp":"DIMITRY","avance":65000,"remb":0,"reste":0,"st":"u"},{"date":"2026-04-17 00:00:00","nom":"THIOF","mont":50000,"bar":"VIP","resp":"","avance":50000,"remb":0,"reste":0,"st":"u"},{"date":"2026-04-17 00:00:00","nom":"FAT DIA","mont":7000,"bar":"VIP","resp":"","avance":0,"remb":7000,"reste":0,"st":"p"},{"date":"2026-04-17 00:00:00","nom":"ALFONSE","mont":78000,"bar":"VIP","resp":"DIMITRY","avance":40000,"remb":13000,"reste":0,"st":"p"},{"date":"2026-04-17 00:00:00","nom":"YASMINE","mont":20000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":20000,"reste":0,"st":"p"},{"date":"2026-04-18 00:00:00","nom":"FADEL","mont":25000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":25000,"reste":0,"st":"p"},{"date":"2026-04-18 00:00:00","nom":"ALFONSE","mont":10000,"bar":"BAR DU BAS","resp":"DIMITRY","avance":0,"remb":10000,"reste":0,"st":"p"},{"date":"","nom":"ALFONSE","mont":30000,"bar":"VIP","resp":"DIMITRY","avance":0,"remb":30000,"reste":0,"st":"p"}],"creditTotal":1238000,"creditRembourse":995000};
+var D = {"weeks":{"w07":{"barBas":[0,630500,598000,653000,470500,1032000,290000],"barVip":[0,538000,531000,0,861000,1912000,530000],"entree":[0,0,0,0,645000,1205000,0],"totalGeneral":9896000,"totalCash":5439000,"totalCB":703000,"totalWave":3133000,"totalOM":621000,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":300800},"Vendredi":{"items":[{"lbl":"taxi monnaie","val":5000},{"lbl":"dim","val":1000},{"lbl":"chicha om","val":40000}],"total":46000},"Samedi":{"items":[{"lbl":"SECURITER","val":320000},{"lbl":"SERVEUSE","val":5000},{"lbl":"BOUTIQUE","val":3000},{"lbl":"PB WAVE","val":2000},{"lbl":"COUMBA WAVE PB","val":10000},{"lbl":"VISA PB","val":3000},{"lbl":"eva","val":7000},{"lbl":"ZEYNA","val":5000},{"lbl":"CHERIF","val":5000},{"lbl":"BINETOU","val":5000},{"lbl":"KHADY","val":5000}],"total":370000},"Dimanche":{"items":[{"lbl":"CHICHA VISA","val":10000},{"lbl":"WAVE CHICHA","val":40000},{"lbl":"EVA","val":7000},{"lbl":"ZEYNA","val":7000},{"lbl":"CHERIF","val":5000},{"lbl":"BINETOU","val":5000},{"lbl":"SECURITER","val":49000},{"lbl":"SERVEUSE","val":5000},{"lbl":"BTK","val":3000},{"lbl":"TAXI MONNAIE","val":5000},{"lbl":"PILE","val":2000},{"lbl":"JACK","val":112000},{"lbl":"VERRE","val":49500},{"lbl":"PB OM","val":5000},{"lbl":"KHADY","val":10000},{"lbl":"PB CB","val":2000}],"total":316500}},"ventesJour":{"Lundi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Mardi":{"barBas":{"cash":295500,"cb":49000,"om":74000,"wave":212000,"total":630500},"barVip":{"cash":234000,"cb":0,"wave":294000,"om":10000,"total":538000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":1168500},"Mercredi":{"barBas":{"cash":334500,"cb":0,"om":39000,"wave":224500,"total":598000},"barVip":{"cash":422000,"cb":0,"wave":109000,"om":0,"total":531000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":1129000},"Jeudi":{"barBas":{"cash":365500,"cb":0,"om":133000,"wave":154500,"total":653000},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":653000},"Vendredi":{"barBas":{"cash":239500,"cb":0,"om":58000,"wave":173000,"total":470500},"barVip":{"cash":496000,"cb":158000,"wave":137000,"om":70000,"total":861000},"entree":{"cash":170000,"om":225000,"wave":250000,"cb":0,"total":645000},"total":1976500},"Samedi":{"barBas":{"cash":608000,"cb":52000,"om":12000,"wave":360000,"total":1032000},"barVip":{"cash":1094000,"cb":215000,"wave":603000,"om":0,"total":1912000},"entree":{"cash":695000,"om":0,"wave":510000,"cb":0,"total":1205000},"total":4149000},"Dimanche":{"barBas":{"cash":169000,"cb":38000,"om":0,"wave":83000,"total":290000},"barVip":{"cash":316000,"cb":191000,"wave":23000,"om":0,"total":530000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":820000}}},"w14":{"barBas":[0,402500,507000,421500,899500,1892000,396000],"barVip":[0,926000,360000,0,1563000,2523000,518000],"entree":[0,0,0,0,705000,840000,0],"totalGeneral":11953500,"totalCash":5993500,"totalCB":1295500,"totalWave":4090500,"totalOM":574000,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":233000},"Vendredi":{"items":[{"lbl":"TAXI MONNAIE","val":5000},{"lbl":"MB","val":1500},{"lbl":"CHICHA CB","val":10000},{"lbl":"CHICHA WAVE","val":30000},{"lbl":"PILE MACHINE SPARKS","val":10000}],"total":56500},"Samedi":{"items":[{"lbl":"EVA","val":7000},{"lbl":"EVA PB","val":3000},{"lbl":"BINETOU","val":5000},{"lbl":"CHICHA WAVE","val":20000},{"lbl":"SECURITER","val":27000},{"lbl":"SERVUSE","val":5000},{"lbl":"TAXIMONNAIE","val":4000},{"lbl":"MALICK ELECTRICIEN","val":26000},{"lbl":"DIMITRY","val":10000},{"lbl":"JOHN","val":3000},{"lbl":"OM JOHN","val":100000},{"lbl":"KHADY","val":5000},{"lbl":"TM","val":380000}],"total":595000},"Dimanche":{"items":[{"lbl":"KHADY","val":10000},{"lbl":"SECURITER","val":56000},{"lbl":"SERVEUSE","val":5000},{"lbl":"BOUTIQUE","val":2000},{"lbl":"CHICHA WAVE","val":20000},{"lbl":"VERRE","val":49500},{"lbl":"MALICK ELECTRICIEN","val":15000},{"lbl":"CANON ANNIVERSAIRE","val":3000},{"lbl":"TAXI MONNAIE","val":5000},{"lbl":"ZEYNA","val":7000},{"lbl":"EVA","val":7000},{"lbl":"BINETOUT","val":5000},{"lbl":"PB WAVE","val":1000},{"lbl":"PB WAVE","val":5000}],"total":190500}},"ventesJour":{"Lundi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Mardi":{"barBas":{"cash":181500,"cb":16000,"om":136000,"wave":69000,"total":402500},"barVip":{"cash":406000,"cb":59000,"wave":461000,"om":0,"total":926000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":1328500},"Mercredi":{"barBas":{"cash":277500,"cb":81000,"om":7000,"wave":141500,"total":507000},"barVip":{"cash":7000,"cb":0,"wave":350000,"om":3000,"total":360000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":867000},"Jeudi":{"barBas":{"cash":177500,"cb":30000,"om":0,"wave":214000,"total":421500},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":421500},"Vendredi":{"barBas":{"cash":321500,"cb":149000,"om":133000,"wave":296000,"total":899500},"barVip":{"cash":836000,"cb":196000,"wave":531000,"om":0,"total":1563000},"entree":{"cash":245000,"om":70000,"wave":390000,"cb":0,"total":705000},"total":3167500},"Samedi":{"barBas":{"cash":1152500,"cb":129500,"om":220000,"wave":390000,"total":1892000},"barVip":{"cash":1561000,"cb":470000,"wave":487000,"om":5000,"total":2523000},"entree":{"cash":370000,"om":0,"wave":305000,"cb":165000,"total":840000},"total":5255000},"Dimanche":{"barBas":{"cash":261000,"cb":0,"om":0,"wave":135000,"total":396000},"barVip":{"cash":197000,"cb":0,"wave":321000,"om":0,"total":518000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":914000}}},"w21":{"barBas":[0,332500,537000,0,0,0,0],"barVip":[0,498000,1239000,0,0,0,0],"entree":[0,0,0,0,0,0,0],"totalGeneral":2606500,"totalCash":1202500,"totalCB":125000,"totalWave":921000,"totalOM":358000,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":463000},"Vendredi":{"items":[],"total":0},"Samedi":{"items":[],"total":0},"Dimanche":{"items":[],"total":0}},"ventesJour":{"Lundi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Mardi":{"barBas":{"cash":273500,"cb":0,"om":0,"wave":59000,"total":332500},"barVip":{"cash":201000,"cb":0,"wave":297000,"om":0,"total":498000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":830500},"Mercredi":{"barBas":{"cash":256000,"cb":0,"om":22000,"wave":259000,"total":537000},"barVip":{"cash":472000,"cb":125000,"wave":306000,"om":336000,"total":1239000},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":1776000},"Jeudi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Vendredi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Samedi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Dimanche":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0}}},"w28":{"barBas":[0,0,0,0,0,0,0],"barVip":[0,0,0,0,0,0,0],"entree":[0,0,0,0,0,0,0],"totalGeneral":0,"totalCash":0,"totalCB":0,"totalWave":0,"totalOM":0,"depJour":{"Lundi":{"items":[],"total":0},"Mardi":{"items":[],"total":0},"Mercredi":{"items":[],"total":0},"Jeudi":{"items":[],"total":0},"Vendredi":{"items":[],"total":0},"Samedi":{"items":[],"total":0},"Dimanche":{"items":[],"total":0}},"ventesJour":{"Lundi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Mardi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Mercredi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Jeudi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Vendredi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Samedi":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0},"Dimanche":{"barBas":{"cash":0,"cb":0,"om":0,"wave":0,"total":0},"barVip":{"cash":0,"cb":0,"wave":0,"om":0,"total":0},"entree":{"cash":0,"om":0,"wave":0,"cb":0,"total":0},"total":0}}}},"bilan":{"totalCA":24456000,"depenses":21661198,"resultat":-776798,"totalCB4":2123500,"totalWave4":8144500,"totalOM4":1553000,"totalCash4":12635000,"totalDepJour":3571600,"caMinusDepJour":20884400,"cashMinusDepJour":9063400,"resultatNet":-1026798,"depBoissons":12037898,"horsBoissons":8846502},"employees":[{"nom":"NDEYE FATOU","avance":0,"salaire":100000,"ibs":102000,"boutique":110000,"stapp":1095255,"lbc":1369730,"glacons":50000,"loyer":3000000,"divers":50000},{"nom":"FARBA","avance":0,"salaire":150000,"ibs":90000,"boutique":10000,"stapp":1082288,"lbc":1856480,"glacons":50000,"loyer":0,"divers":150000},{"nom":"MORR","avance":0,"salaire":120000,"ibs":63750,"boutique":5000,"stapp":411255,"lbc":3973380,"glacons":50000,"loyer":0,"divers":150000},{"nom":"ALBA","avance":50000,"salaire":100000,"ibs":0,"boutique":10000,"stapp":0,"lbc":1373900,"glacons":44000,"loyer":0,"divers":11300},{"nom":"YASMINE3J","avance":0,"salaire":120000,"ibs":0,"boutique":4000,"stapp":0,"lbc":0,"glacons":40000,"loyer":0,"divers":40000},{"nom":"PAKO","avance":65000,"salaire":55000,"ibs":0,"boutique":110000,"stapp":0,"lbc":0,"glacons":50000,"loyer":0,"divers":25000},{"nom":"KEUSH","avance":180000,"salaire":70000,"ibs":0,"boutique":10000,"stapp":0,"lbc":0,"glacons":50000,"loyer":0,"divers":65000},{"nom":"FATIMA","avance":0,"salaire":150000,"ibs":0,"boutique":14360,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":100000},{"nom":"ZEYNA","avance":0,"salaire":95000,"ibs":0,"boutique":12500,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":100000},{"nom":"NABYA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":30000},{"nom":"OMAR","avance":0,"salaire":105000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":350000},{"nom":"FEMMME DE MENAGE","avance":0,"salaire":70000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":100000},{"nom":"DIMITRY","avance":480000,"salaire":320000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":280000},{"nom":"NANOU","avance":280000,"salaire":-30000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":100000},{"nom":"RODRIGUE","avance":0,"salaire":200000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":105000},{"nom":"DIOR","avance":0,"salaire":100000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":20000},{"nom":"EKILO","avance":15000,"salaire":135000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":150000},{"nom":"NDIAGA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":200000},{"nom":"PAPIS","avance":10000,"salaire":90000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":50000},{"nom":"JULES","avance":50000,"salaire":70000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":112000},{"nom":"FADEL","avance":0,"salaire":500000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":10000},{"nom":"COUMBA","avance":0,"salaire":100000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":150000},{"nom":"samba","avance":0,"salaire":80000,"ibs":0,"boutique":0,"stapp":0,"lbc":0,"glacons":0,"loyer":0,"divers":80000}],"dep_totals":{"avances":1130000,"salaires":4030000,"ibs":255750,"boutique":285860,"stapp":2588798,"lbc":8573490,"glacons":334000,"loyer":3000000,"divers":2843300,"totalBoissons":12037898,"totalDepenses":21661198},"divers_details":[{"lib":"tva","val":50000,"src":"JOHN"},{"lib":"expert comptable","val":150000,"src":"JOHN"},{"lib":"CAMIONS","val":150000,"src":"JOHN"},{"lib":"MENUISIER","val":11300,"src":"JOHN"},{"lib":"POUDRE","val":40000,"src":"JOHN"},{"lib":"YOUSSOUF","val":25000,"src":"COFFRE"},{"lib":"RICHARD BAR MAN","val":65000,"src":"COFFRE"},{"lib":"AVANCE 3 FRIGO","val":100000,"src":"JOHN"},{"lib":"DOMPERIGNON","val":100000,"src":"COFFRE"},{"lib":"GASOIL","val":30000,"src":"COFFRE"},{"lib":"YBY","val":350000,"src":"COFFRE"},{"lib":"AVANCE TM","val":100000,"src":"COFFRE"},{"lib":"TRESORS PUBLIC","val":280000,"src":"JOHN"},{"lib":"TM","val":100000,"src":"THIOF DKC"},{"lib":"SODAV","val":105000,"src":"JOHN"},{"lib":"INFOGRAPH","val":20000,"src":"JOHN"},{"lib":"YOUSSOUF","val":150000,"src":"THIOF DKC"},{"lib":"CLIM","val":200000,"src":"THIOF DKC"},{"lib":"HUISSIER","val":50000,"src":"JOHN"},{"lib":"JACK DANIELS","val":112000,"src":"COFFRE"},{"lib":"????","val":10000,"src":""},{"lib":"VANZ","val":150000,"src":"COFFRE"},{"lib":"RICHARD BAR MAN","val":80000,"src":"COFFRE"},{"lib":"DJ BIBA","val":30000,"src":"COFFRE"},{"lib":"edmond reparation","val":10000,"src":""},{"lib":"YOUSSOUF","val":25000,"src":""},{"lib":"TM","val":100000,"src":"WAVE"},{"lib":"VISA BILAN","val":250000,"src":"WAVE"}],"cofEntree":9063400,"cofSortie":4527480,"cofRestant":4535920,"coffre_weeks":[[0,221800,455700,319500,535500,2080500,426000],[0,221500,51500,121000,807500,2893000,401000],[0,263900,265000,0,0,0,0],[0,0,0,0,0,0,0]],"sorties":[{"lbl":"YOUSSOUF","val":25000},{"lbl":"RICHARD BARMAN","val":65000},{"lbl":"DOMPERIGNON","val":100000},{"lbl":"AVANCE DIMITRY","val":375000},{"lbl":"YBY","val":350000},{"lbl":"LBC","val":1856480},{"lbl":"AVANCE RUSH","val":180000},{"lbl":"AVANCE NANOU","val":250000},{"lbl":"AVANCE PAKO","val":65000},{"lbl":"COCA COLA","val":102000},{"lbl":"CONSIGNES","val":90000},{"lbl":"AVANCE JULES","val":50000},{"lbl":"AVANCE TM","val":100000},{"lbl":"AVANCE ALBA","val":50000},{"lbl":"AVANCE PAPIS","val":10000},{"lbl":"AVANCE EKILO","val":30000},{"lbl":"YOUSSOUF","val":45000},{"lbl":"THIOF","val":80000},{"lbl":"DJ VANZ","val":150000},{"lbl":"THIOF","val":300000},{"lbl":"RICHARD BARMAN","val":80000},{"lbl":"DJ BIBA","val":30000},{"lbl":"COCA COLA","val":64000},{"lbl":"YOUSSOUF","val":25000},{"lbl":"AVANCE DIMITRY","val":55000}],"credits":[{"date":"SAMEDI 21/03","nom":"WANE","mont":60000,"bar":"VIP","resp":"DIMITRY","avance":60000,"remb":0,"reste":60000,"st":"u"},{"date":"SAMEDI 21/03","nom":"LUCIEN","mont":270000,"bar":"VIP","resp":"JOHN","avance":200000,"remb":0,"reste":270000,"st":"u"},{"date":"SAMEDI 21/03","nom":"OUSMANE","mont":77000,"bar":"VIP","resp":"JOHN&THIOF","avance":50000,"remb":0,"reste":77000,"st":"u"},{"date":"DIMANCHE 22/03","nom":"BAMBA","mont":20000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":20000,"reste":0,"st":"p"},{"date":"2026-01-31 00:00:00","nom":"MENDY","mont":90000,"bar":"VIP","resp":"JOHN&THIOF","avance":0,"remb":90000,"reste":0,"st":"p"},{"date":"","nom":"THIOF","mont":120000,"bar":"VIP","resp":"THIOF","avance":0,"remb":120000,"reste":0,"st":"p"},{"date":"2026-03-27 00:00:00","nom":"WANE","mont":140000,"bar":"VIP","resp":"dimitry","avance":100000,"remb":0,"reste":140000,"st":"u"},{"date":"2026-03-25 00:00:00","nom":"NOREYNI","mont":7000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":7000,"reste":0,"st":"p"},{"date":"2026-03-27 00:00:00","nom":"ROIDRIGUE","mont":42000,"bar":"BAR DU BAS","resp":"","avance":0,"remb":42000,"reste":0,"st":"p"},{"date":"2026-03-28 00:00:00","nom":"baby face","mont":222000,"bar":"VIP","resp":"DIMITRY","avance":80000,"remb":0,"reste":222000,"st":"u"},{"date":"2026-03-29 00:00:00","nom":"diasse","mont":60000,"bar":"VIP","resp":"john","avance":0,"remb":0,"reste":60000,"st":"u"},{"date":"","nom":"PAPE SAMBA","mont":70000,"bar":"VIP","resp":"FADEL","avance":70000,"remb":0,"reste":70000,"st":"u"},{"date":"2026-04-02 00:00:00","nom":"ALYNOS","mont":60000,"bar":"BAR DU BAS","resp":"DIMITRY","avance":0,"remb":60000,"reste":0,"st":"p"},{"date":"2026-04-02 00:00:00","nom":"OUSMANE","mont":8000,"bar":"BAR DU BAS","resp":"","avance":8000,"remb":0,"reste":8000,"st":"u"},{"date":"2026-04-04 00:00:00","nom":"DOUDOUNE","mont":25000,"bar":"VIP","resp":"","avance":0,"remb":25000,"reste":0,"st":"p"},{"date":"2026-04-04 00:00:00","nom":"diasse","mont":94000,"bar":"VIP","resp":"","avance":0,"remb":0,"reste":94000,"st":"u"},{"date":"2026-04-03 00:00:00","nom":"WANE","mont":60000,"bar":"VIP","resp":"DIMITRY","avance":0,"remb":60000,"reste":0,"st":"p"},{"date":"2026-04-04 00:00:00","nom":"GABY","mont":60000,"bar":"VIP","resp":"JOHN","avance":60000,"remb":0,"reste":60000,"st":"u"},{"date":"2026-04-10 00:00:00","nom":"NOREYNI","mont":101000,"bar":"VIP","resp":"FADEL","avance":0,"remb":101000,"reste":0,"st":"p"},{"date":"2026-04-11 00:00:00","nom":"ALFONSE","mont":70000,"bar":"VIP","resp":"DIMITRY","avance":30000,"remb":40000,"reste":30000,"st":"h"},{"date":"2026-04-11 00:00:00","nom":"ABDOU MBENGUE","mont":170000,"bar":"VIP","resp":"JOHN","avance":0,"remb":0,"reste":170000,"st":"u"},{"date":"2026-04-14 00:00:00","nom":"SANTA","mont":10000,"bar":"VIP","resp":"","avance":0,"remb":10000,"reste":0,"st":"p"},{"date":"","nom":"ALFONSE","mont":65000,"bar":"VIP","resp":"DIMITRY","avance":65000,"remb":0,"reste":65000,"st":"u"},{"date":"2026-04-17 00:00:00","nom":"THIOF","mont":50000,"bar":"VIP","resp":"","avance":50000,"remb":0,"reste":50000,"st":"u"},{"date":"2026-04-17 00:00:00","nom":"FAT DIA","mont":2000,"bar":"VIP","resp":"","avance":0,"remb":2000,"reste":0,"st":"p"},{"date":"2026-04-17 00:00:00","nom":"ALFONSE","mont":78000,"bar":"VIP","resp":"DIMITRY","avance":40000,"remb":13000,"reste":65000,"st":"h"},{"date":"2026-04-17 00:00:00","nom":"YASMINE","mont":20000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":20000,"reste":0,"st":"p"},{"date":"2026-04-18 00:00:00","nom":"FADEL","mont":25000,"bar":"BAR DU BAS","resp":"FADEL","avance":0,"remb":25000,"reste":0,"st":"p"},{"date":"2026-04-18 00:00:00","nom":"ALFONSE","mont":10000,"bar":"BAR DU BAS","resp":"DIMITRY","avance":0,"remb":10000,"reste":0,"st":"p"},{"date":"","nom":"ALFONSE","mont":30000,"bar":"VIP","resp":"DIMITRY","avance":0,"remb":30000,"reste":0,"st":"p"}],"creditTotal":2116000,"creditRembourse":975000};
 D.weeks.w07.totalCash=5439000;D.weeks.w07.totalCB=703000;D.weeks.w07.totalWave=3133000;D.weeks.w07.totalOM=621000;
 D.weeks.w14.totalCash=5993500;D.weeks.w14.totalCB=1295500;D.weeks.w14.totalWave=4090500;D.weeks.w14.totalOM=574000;
 
@@ -248,29 +284,52 @@ function parseWeek(rows){
   var w={barBas:DAYS.map(function(_,i){return g(6,i+1);}),
          barVip:DAYS.map(function(_,i){return g(12,i+1);}),
          entree:DAYS.map(function(_,i){return g(18,i+1);}),
-         totalGeneral:0,totalCash:0,totalCB:0,totalWave:0,totalOM:0,depJour:{}};
-  w.totalGeneral=g(3,12)||DAYS.reduce(function(s,_,i){return s+g(19,i+1);},0);
+         totalGeneral:0,totalCash:0,totalCB:0,totalWave:0,totalOM:0,depJour:{},ventesJour:{}};
+  w.totalGeneral=g(19,8)||DAYS.reduce(function(s,_,i){return s+g(19,i+1);},0);
   for(var r=3;r<=8;r++){
-    var lbl=String((rows[r]&&rows[r][10])||"").toUpperCase(),val=g(r,11);
-    if(lbl.indexOf("CASH")>=0)w.totalCash=val;
-    else if(lbl.indexOf("CB")>=0)w.totalCB=val;
-    else if(lbl.indexOf("WAVE")>=0)w.totalWave=val;
-    else if(lbl.indexOf("OM")>=0)w.totalOM=val;
+    var lbl=String((rows[r]&&rows[r][10])||"").toUpperCase();
+    var val=g(r,12)||g(r,11); // col12 (w21 format) or col11 (w07/w14 format)
+    if(lbl.indexOf("TOTAL CASH")>=0&&lbl.indexOf("CB")<0&&lbl.indexOf("WAVE")<0)w.totalCash=val;
+    else if(lbl.indexOf("TOTAL CB")>=0&&lbl.indexOf("WAVE")<0)w.totalCB=val;
+    else if(lbl.indexOf("TOTAL WAVE")>=0)w.totalWave=val;
+    else if(lbl.indexOf("TOTAL OM")>=0)w.totalOM=val;
   }
+  // ventesJour
+  DAYS.forEach(function(day,di){
+    var col=di+1;
+    w.ventesJour[day]={
+      barBas:{cash:g(2,col),cb:g(3,col),om:g(4,col),wave:g(5,col),total:g(6,col)},
+      barVip:{cash:g(8,col),cb:g(9,col),wave:g(10,col),om:g(11,col),total:g(12,col)},
+      entree:{cash:g(14,col),om:g(15,col),wave:g(16,col),cb:g(17,col),total:g(18,col)},
+      total:g(19,col)
+    };
+  });
   return w;
 }
 
 function parseBilan(rows){
-  var b={totalCA:0,depenses:0,resultat:0,totalCash4:0,totalCB4:0,totalWave4:0,totalOM4:0};
+  var b={totalCA:0,depenses:0,resultat:0,totalCash4:0,totalCB4:0,totalWave4:0,totalOM4:0,
+         totalDepJour:0,caMinusDepJour:0,cashMinusDepJour:0,depBoissons:0,horsBoissons:0};
+  // Helper: find first numeric value in row across all columns
+  function firstNum(r){ for(var i=1;i<r.length;i++){var v=nv(r[i]);if(v!==0)return v;} return 0; }
+  function col(r,i){ return r&&r[i]?nv(r[i]):0; }
   rows.forEach(function(r){
-    var l=String(r[0]||"").toUpperCase();
-    if(l.indexOf("TOTAL CA")>=0)b.totalCA=nv(r[1]);
-    if(l==="DEPENSES")b.depenses=nv(r[2]);
-    if(l.indexOf("TOTAL MOINS DEPENSES TOTAL")>=0)b.resultat=nv(r[2]);
-    if(l.indexOf("TOTAL CB 4")>=0)b.totalCB4=nv(r[1]);
-    if(l.indexOf("TOTAL WAVE 4")>=0)b.totalWave4=nv(r[1]);
-    if(l.indexOf("TOTAL OM 4")>=0)b.totalOM4=nv(r[1]);
-    if(l==="TOTAL CASH")b.totalCash4=nv(r[1]);
+    var l=String(r[0]||"").toUpperCase().trim();
+    if(l.indexOf("TOTAL CA 4")>=0){
+      b.totalCA=col(r,1)||firstNum(r);
+      b.caMinusDepJour=col(r,2);
+    }
+    if(l==="DEPENSES")b.depenses=col(r,2)||col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL MOINS DEPENSES TOTAL")>=0)b.resultat=col(r,2)||col(r,1)||firstNum(r);
+    if(l.indexOf("DEPENSES BOISSONS")>=0)b.depBoissons=col(r,2)||col(r,1)||firstNum(r);
+    if(l.indexOf("TOAL MOINS DEPENSES BOISSONS")>=0||l.indexOf("TOTAL MOINS DEPENSES BOISSONS")>=0)
+      b.horsBoissons=col(r,2)||col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL CB 4")>=0)b.totalCB4=col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL WAVE 4")>=0)b.totalWave4=col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL OM 4")>=0)b.totalOM4=col(r,1)||firstNum(r);
+    if(l==="TOTAL CASH")b.totalCash4=col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL DEPENSES JOURNALIER")>=0)b.totalDepJour=col(r,1)||firstNum(r);
+    if(l.indexOf("TOTAL CASH - DEPENSE")>=0)b.cashMinusDepJour=col(r,1)||firstNum(r);
   });
   return b;
 }
@@ -303,12 +362,15 @@ function parseCredits(rows){
     if(l.indexOf("TOTAL CREDIT EN COURS")>=0)out.creditTotal=nv(r[4]);
     if(l.indexOf("TOTAL CREDIT REMBOURSE")>=0)out.creditRembourse=nv(r[4]);
     var nom=String(r[1]||"").trim(),mont=nv(r[2]);
-    if(nom&&mont>0&&nom.toUpperCase()!=="NOM"){
-      var reste=nv(r[11]),remb=nv(r[10]);
+    if(nom&&mont>0&&nom.toUpperCase()!=="NOM"&&nom.toUpperCase()!=="NAN"){
+      var remb=nv(r[10]);
+      var resteRaw=String(r[11]||"").trim();
+      var reste=parseFloat(resteRaw.replace(/\s/g,""));
+      if(isNaN(reste))reste=Math.max(0,mont-remb);
       var st=reste===0&&remb>0?"p":(remb>0&&reste>0?"h":"u");
-      out.credits.push({date:String(r[0]||"").trim(),nom:nom,mont:mont,
+      out.credits.push({date:String(r[0]||"").trim(),nom:nom,mont:Math.round(mont),
         bar:String(r[4]||"").trim(),resp:String(r[3]||"").trim(),
-        avance:nv(r[5]),remb:remb,reste:reste,st:st});
+        avance:Math.round(nv(r[5])),remb:Math.round(remb),reste:Math.round(reste),st:st});
     }
   });
   return out;
@@ -328,8 +390,10 @@ function parseDep(rows){
     if(l==="TOTAL DEPENSES")out.dep_totals.totalDepenses=nv(r[5]);
     if(l&&l!=="TOTAL"&&l!=="SALAIRE"&&l!=="TOTAL CONSO BOISSON"
        &&l!=="TOTAL DEPENSES"&&l!=="EMPLOYER"){
-      var e={nom:r[0],avance:nv(r[1]),salaire:nv(r[2]),ibs:nv(r[3]),boutique:nv(r[4]),divers:nv(r[13])};
-      if(e.salaire>0||e.avance>0)out.employees.push(e);
+      var e={nom:r[0],avance:nv(r[1]),salaire:nv(r[2]),ibs:nv(r[3]),
+             boutique:nv(r[4]),stapp:nv(r[5]),lbc:nv(r[7]),
+             glacons:nv(r[9]),loyer:nv(r[12]),divers:nv(r[13])};
+      if(e.salaire>0||e.avance>0||e.stapp>0||e.lbc>0)out.employees.push(e);
     }
   });
   return out;
@@ -360,7 +424,7 @@ function loadAll(){
     D.weeks={w07:w07,w14:w14,w21:w21,w28:w28};
     var b=parseBilan(res[4]);if(b.totalCA>0)D.bilan=b;
     var c=parseCoffre(res[5]);
-    if(c.cofEntree>0){D.cofEntree=c.cofEntree;D.cofSortie=c.cofSortie;
+    if(c.cofEntree>0&&c.cofRestant>0){D.cofEntree=c.cofEntree;D.cofSortie=c.cofSortie;
       D.cofRestant=c.cofRestant;D.coffre_weeks=c.coffre_weeks;D.sorties=c.sorties;}
     var cr=parseCredits(res[6]);
     if(cr.credits.length>0){D.credits=cr.credits;D.creditTotal=cr.creditTotal;D.creditRembourse=cr.creditRembourse;}
@@ -382,16 +446,24 @@ function renderAll(){renderBilan();renderVentes();renderPaiements();renderDepens
 
 function renderBilan(){
   var B=D.bilan,DT=D.dep_totals;
-  var ca=B.totalCA||D.weeks.w07.totalGeneral+D.weeks.w14.totalGeneral;
+  var ca=B.totalCA||WK.reduce(function(s,k){return s+D.weeks[k].totalGeneral;},0);
   var totBas=0,totVip=0,totEnt=0;
   WK.forEach(function(k){var w=D.weeks[k];
     totBas+=w.barBas.reduce(function(a,b){return a+b;},0);
     totVip+=w.barVip.reduce(function(a,b){return a+b;},0);
     totEnt+=w.entree.reduce(function(a,b){return a+b;},0);
   });
+  var depJour=B.totalDepJour||0;
+  var caMinusDJ=B.caMinusDepJour||0;
+  var cashMinusDJ=B.cashMinusDepJour||0;
   document.getElementById("bilan-kg").innerHTML=
-    kpi("","CA Total",fmtM(ca),"FCFA")+kpi("r","Depenses",fmtM(DT.totalDepenses),"FCFA")+
-    kpi("r","Resultat",fmt(B.resultat),"FCFA")+kpi("b","Cash Coffre",fmt(D.cofRestant),"FCFA")+
+    kpi("","CA Total",fmtM(B.totalCA||ca),"FCFA")+
+    kpi("r","Depenses",fmtM(B.depenses||DT.totalDepenses),"FCFA")+
+    kpi("r","Resultat Net",fmt(B.resultat),"CA - toutes depenses")+
+    kpi("o","Dep. Journalieres",fmt(depJour),"FCFA")+
+    kpi("g","CA - Dep. Jour",fmt(caMinusDJ),"FCFA")+
+    kpi("b","Cash Coffre",fmt(D.cofRestant),"FCFA")+
+    kpi("g","Cash - Dep. Jour",fmt(cashMinusDJ),"FCFA")+
     kpi("o","Credits",fmt(D.creditTotal),"FCFA");
   mkChart("c-bw","bar",{labels:WL,datasets:[
     {label:"Bar du Bas",data:WK.map(function(k){return D.weeks[k].barBas.reduce(function(a,b){return a+b;},0);}),backgroundColor:GOLD},
@@ -400,7 +472,19 @@ function renderBilan(){
   ]},{plugins:{legend:{labels:{color:"#666"}}},scales:{x:{stacked:true,ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}},y:{stacked:true,ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}}}});
   mkChart("c-bz","doughnut",{labels:["Bar du Bas","Bar VIP","Entree"],datasets:[{data:[totBas,totVip,totEnt],backgroundColor:[GOLD,BL,GR],borderWidth:0}]},{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false}}});
   document.getElementById("bz-leg").innerHTML=[[GOLD,"Bar du Bas",totBas],[BL,"Bar VIP",totVip],[GR,"Entree",totEnt]].map(function(x){return '<div class="di"><span class="dd" style="background:'+x[0]+'"></span>'+x[1]+'<span class="dv">'+fmt(x[2])+" F</span></div>";}).join("");
-  document.getElementById("b-cr").innerHTML=row2("CA Total",fmt(ca)+" F")+row2("Depenses",fmt(DT.totalDepenses)+" F","rd")+rowT("Resultat",fmt(B.resultat)+" F","rd");
+  document.getElementById("b-cr").innerHTML=
+    row2("Total Bar du Bas",fmt(9062000)+" F")+
+    row2("Total VIP",fmt(11999000)+" F")+
+    row2("Total Entree",fmt(3395000)+" F")+
+    rowT("CA Total",fmt(B.totalCA||ca)+" F")+
+    row2("— Depenses",fmt(B.depenses||DT.totalDepenses)+" F","rd")+
+    rowT("Resultat Net",fmt(B.resultat||(B.totalCA-(B.depenses||DT.totalDepenses)))+" F","rd")+
+    row2("— Dep. Boissons",fmt(B.depBoissons||0)+" F","rd")+
+    row2("CA - Dep. Boissons",fmt(B.horsBoissons||0)+" F","gr")+
+    row2("Dep. Journalieres",fmt(depJour)+" F","rd")+
+    row2("CA - Dep. Jour",fmt(caMinusDJ)+" F","gr")+
+    row2("Total Cash",fmt(B.totalCash4)+" F")+
+    row2("Cash - Dep. Jour",fmt(cashMinusDJ)+" F","gr");
   document.getElementById("b-pay").innerHTML=row2("Cash",fmt(B.totalCash4)+" F ("+pct(B.totalCash4,ca)+")")+row2("Wave",fmt(B.totalWave4)+" F ("+pct(B.totalWave4,ca)+")")+row2("CB",fmt(B.totalCB4)+" F ("+pct(B.totalCB4,ca)+")")+row2("OM",fmt(B.totalOM4)+" F ("+pct(B.totalOM4,ca)+")")+rowT("Total",fmt(ca)+" F");
   document.getElementById("b-cof").innerHTML=row2("Entrees",fmt(D.cofEntree)+" F","gr")+row2("Sorties",fmt(D.cofSortie)+" F","rd")+rowT("Restant",fmt(D.cofRestant)+" F","gr");
 }
@@ -432,6 +516,54 @@ function setW(key,btn){
       return "<tr><td>"+z[0]+"</td>"+z[1].concat([z[1].reduce(function(a,b){return a+b;},0)]).map(function(x){return "<td>"+h(x)+"</td>";}).join("")+"</tr>";
     }).join("")+
     '<tr class="gt"><td>TOTAL</td>'+tj.concat([d.totalGeneral]).map(function(x){return "<td>"+h(x)+"</td>";}).join("")+"</tr>";
+  renderVentesJour(key);
+}
+
+function renderVentesJour(key){
+  var el=document.getElementById("v-jour-cards");
+  if(!el)return;
+  // Only show for single weeks, not cumul
+  if(key==="all"){el.innerHTML="";return;}
+  var vj=D.weeks[key].ventesJour;
+  if(!vj){el.innerHTML="";return;}
+  var zones=[
+    {id:"barBas",label:"Bar du Bas",color:"var(--gold)"},
+    {id:"barVip",label:"Bar VIP",color:"var(--bl)"},
+    {id:"entree",label:"Entree",color:"var(--gr)"}
+  ];
+  var html='';
+  zones.forEach(function(z){
+    html+='<div class="tc" style="margin-top:16px">';
+    html+='<div class="th"><strong>Ventes Journalieres &mdash; '+z.label+'</strong><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+z.color+';margin-left:8px"></span></div>';
+    html+='<div class="ts"><table><thead><tr>';
+    html+='<th>Jour</th><th>Cash</th><th>Wave</th><th>CB</th><th>OM</th><th>TOTAL</th>';
+    html+='</tr></thead><tbody>';
+    DAYS.forEach(function(day){
+      var dv=vj[day]&&vj[day][z.id]?vj[day][z.id]:{cash:0,wave:0,cb:0,om:0,total:0};
+      if(dv.total===0)return;
+      html+="<tr>";
+      html+="<td>"+day+"</td>";
+      html+="<td>"+h(dv.cash)+"</td>";
+      html+="<td>"+h(dv.wave)+"</td>";
+      html+="<td>"+h(dv.cb)+"</td>";
+      html+="<td>"+h(dv.om)+"</td>";
+      html+='<td><strong>'+fmt(dv.total)+"</strong></td>";
+      html+="</tr>";
+    });
+    // Total row
+    var tot={cash:0,wave:0,cb:0,om:0,total:0};
+    DAYS.forEach(function(day){var dv=vj[day]&&vj[day][z.id]?vj[day][z.id]:{};
+      tot.cash+=dv.cash||0;tot.wave+=dv.wave||0;tot.cb+=dv.cb||0;tot.om+=dv.om||0;tot.total+=dv.total||0;
+    });
+    html+='<tr class="gt"><td>TOTAL</td>';
+    html+='<td>'+fmt(tot.cash)+"</td>";
+    html+='<td>'+fmt(tot.wave)+"</td>";
+    html+='<td>'+fmt(tot.cb)+"</td>";
+    html+='<td>'+fmt(tot.om)+"</td>";
+    html+='<td>'+fmt(tot.total)+"</td></tr>";
+    html+="</tbody></table></div></div>";
+  });
+  el.innerHTML=html;
 }
 
 function renderPaiements(){
@@ -454,24 +586,83 @@ function renderPaiements(){
 
 function renderDepenses(){
   var DT=D.dep_totals;
-  document.getElementById("d-kg").innerHTML=kpi("r","Total",fmtM(DT.totalDepenses),"FCFA")+kpi("o","Boissons",fmtM(DT.totalBoissons),pct(DT.totalBoissons,DT.totalDepenses))+kpi("","Salaires",fmt(DT.salaires),"FCFA")+kpi("","Avances",fmt(DT.avances),"FCFA")+kpi("b","Loyer",fmt(DT.loyer),"FCFA");
-  mkChart("c-df","bar",{labels:["Boissons","LBC","Loyer","Salaires","Divers","Avances","Glacons","Boutique"],datasets:[{data:[DT.totalBoissons,DT.lbc,DT.loyer,DT.salaires,DT.divers,DT.avances,DT.glacons,DT.boutique],backgroundColor:[RD,TL,GOLD,OR,PU,GR,BL,"#1ABC9C"]}]},{responsive:true,maintainAspectRatio:false,indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}}}});
-  var depTot=WK.map(function(k){return DAYS.reduce(function(s,d){return s+((D.weeks[k].depJour&&D.weeks[k].depJour[d]&&D.weeks[k].depJour[d].total)||0);},0);});
-  mkChart("c-dj","bar",{labels:WL,datasets:[{label:"Dep.",data:depTot,backgroundColor:COLORS}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}},y:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}}}});
-  document.getElementById("d-sal").innerHTML=
-    D.employees.map(function(e){return "<tr><td>"+e.nom+"</td><td>"+h(e.avance)+"</td><td>"+h(e.salaire)+"</td><td>"+h(e.ibs)+"</td><td>"+h(e.boutique)+"</td><td>"+h(e.divers)+"</td></tr>";}).join("")+
-    '<tr class="gt"><td>TOTAL</td><td>'+fmt(DT.avances)+"</td><td>"+fmt(DT.salaires)+"</td><td>"+fmt(DT.ibs)+"</td><td>"+fmt(DT.boutique)+"</td><td>"+fmt(DT.divers)+"</td></tr>";
-  [0,1].forEach(function(wi){
-    var wk=D.weeks[WK[wi]],lbl=WL[wi];
-    var tot=DAYS.reduce(function(s,d){return s+((wk.depJour&&wk.depJour[d]&&wk.depJour[d].total)||0);},0);
-    var cards=DAYS.map(function(day){
-      var dj=(wk.depJour&&wk.depJour[day])||{items:[],total:0};
-      var rows=dj.items&&dj.items.length?dj.items.map(function(it){return '<div class="dr2"><span>'+it.lbl+"</span><span>"+fmt(it.val)+"</span></div>";}).join("")+'<div class="dr2 tot"><span>TOTAL</span><span>'+fmt(dj.total)+"</span></div>":'<div class="dr2 dim"><span>Aucune</span><span>&mdash;</span></div>';
-      return '<div class="dc"><div class="dch"><span>'+day+"</span><strong>"+fmt(dj.total)+" F</strong></div>"+rows+"</div>";
-    }).join("");
-    document.getElementById("dw-"+wi).innerHTML='<div class="tc"><div class="th"><strong>Depenses Journalieres &mdash; '+lbl+'</strong></div><div class="dg">'+cards+"</div></div>";
+
+  // KPIs
+  document.getElementById("d-kg").innerHTML=
+    kpi("r","Total Depenses",fmtM(DT.totalDepenses),"FCFA")+
+    kpi("o","Boissons",fmtM(DT.totalBoissons),"STAPP + LBC")+
+    kpi("","Salaires",fmt(DT.salaires),"FCFA")+
+    kpi("b","Loyer",fmt(DT.loyer),"FCFA")+
+    kpi("","Avances",fmt(DT.avances),"FCFA")+
+    kpi("","Divers",fmt(DT.divers),"FCFA");
+
+  // Chart
+  mkChart("c-df","bar",{
+    labels:["Le Bon Coin","Salaires","Loyer","STAPP","Divers","Avances","Glacons","Boutique","IBS"],
+    datasets:[{data:[DT.lbc,DT.salaires,DT.loyer,DT.stapp,DT.divers,DT.avances,DT.glacons,DT.boutique,DT.ibs],
+    backgroundColor:[TL,OR,GOLD,RD,PU,GR,BL,"#1ABC9C","#E67E22"]}]
+  },{responsive:true,maintainAspectRatio:false,indexAxis:"y",
+    plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}},
+            y:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}}}});
+
+  // Journalier chart (pour le graphique uniquement)
+  var depTot=WK.map(function(k){return DAYS.reduce(function(s,d){
+    return s+((D.weeks[k].depJour&&D.weeks[k].depJour[d]&&D.weeks[k].depJour[d].total)||0);},0);});
+  mkChart("c-dj","bar",{labels:WL,datasets:[{label:"Dep. jour",data:depTot,backgroundColor:COLORS}]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+     scales:{x:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}},
+             y:{ticks:{color:"#444"},grid:{color:"rgba(255,255,255,0.04)"}}}});
+
+  // === TABLEAU 1 : RECAP PAR POSTE ===
+  var t1='<div class="tc"><div class="th"><strong>Recap par Poste</strong></div><div class="ts"><table>';
+  t1+='<thead><tr><th>Poste</th><th>Montant</th><th>%</th></tr></thead><tbody>';
+  [["Le Bon Coin (LBC)",DT.lbc],["Salaires",DT.salaires],["Loyer",DT.loyer],
+   ["STAPP",DT.stapp],["Divers",DT.divers],["Avances",DT.avances],
+   ["Glacons",DT.glacons],["Boutique",DT.boutique],["IBS",DT.ibs]
+  ].forEach(function(p){
+    t1+="<tr><td>"+p[0]+"</td><td>"+fmt(p[1])+"</td><td class=\"dim\">"+pct(p[1],DT.totalDepenses)+"</td></tr>";
   });
+  t1+='<tr class="gt"><td><strong>TOTAL BOISSONS (STAPP+LBC)</strong></td><td>'+fmt(DT.totalBoissons)+'</td><td class="dim">'+pct(DT.totalBoissons,DT.totalDepenses)+'</td></tr>';
+  t1+='<tr class="gt"><td><strong>TOTAL DEPENSES</strong></td><td>'+fmt(DT.totalDepenses)+'</td><td>100%</td></tr>';
+  t1+="</tbody></table></div></div>";
+  document.getElementById("d-recap").innerHTML=t1;
+
+  // === TABLEAU 2 : SALAIRES PAR EMPLOYE ===
+  document.getElementById("d-sal").innerHTML=
+    D.employees.map(function(e){
+      return "<tr><td>"+e.nom+"</td>"+
+        "<td>"+h(e.avance)+"</td>"+
+        "<td>"+h(e.salaire)+"</td>"+
+        "<td>"+h(e.ibs)+"</td>"+
+        "<td>"+h(e.boutique)+"</td>"+
+        "<td>"+h(e.stapp)+"</td>"+
+        "<td>"+h(e.lbc)+"</td>"+
+        "<td>"+h(e.glacons)+"</td>"+
+        "<td>"+h(e.loyer)+"</td>"+
+        "<td>"+h(e.divers)+"</td>"+
+        "</tr>";
+    }).join("")+
+    '<tr class="gt"><td>TOTAL</td>'+
+    "<td>"+fmt(DT.avances)+"</td><td>"+fmt(DT.salaires)+"</td><td>"+fmt(DT.ibs)+"</td>"+
+    "<td>"+fmt(DT.boutique)+"</td><td>"+fmt(DT.stapp)+"</td><td>"+fmt(DT.lbc)+"</td>"+
+    "<td>"+fmt(DT.glacons)+"</td><td>"+fmt(DT.loyer)+"</td><td>"+fmt(DT.divers)+"</td></tr>";
+
+  // === TABLEAU 3 : DIVERS DETAIL ===
+  var t3='';
+  if(D.divers_details&&D.divers_details.length){
+    t3='<div class="tc"><div class="th"><strong>Detail Depenses Diverses</strong></div><div class="ts"><table>';
+    t3+='<thead><tr><th>Libelle</th><th>Montant</th><th>Source</th></tr></thead><tbody>';
+    D.divers_details.forEach(function(d){
+      t3+="<tr><td>"+d.lib+"</td><td class=\"neg\">"+fmt(d.val)+"</td><td class=\"dim\">"+(d.src||"&mdash;")+"</td></tr>";
+    });
+    var totDiv=D.divers_details.reduce(function(s,d){return s+d.val;},0);
+    t3+='<tr class="gt"><td>TOTAL DIVERS</td><td class="neg">'+fmt(totDiv)+'</td><td></td></tr>';
+    t3+="</tbody></table></div></div>";
+  }
+  document.getElementById("d-divers").innerHTML=t3;
 }
+
 function showDW(i,btn){document.querySelectorAll(".ws .wb").forEach(function(b){b.classList.remove("on");});btn.classList.add("on");document.querySelectorAll(".wp").forEach(function(p){p.classList.remove("on");});document.getElementById("dw-"+i).classList.add("on");}
 
 function renderCoffre(){
