@@ -128,6 +128,10 @@ function applyRole(role){
     if(credTab) credTab.style.display="none";
     var credSec = document.getElementById("credits");
     if(credSec) credSec.style.display="none";
+    var factTab = document.querySelector('.tab[onclick*="factures"]');
+    if(factTab) factTab.style.display="none";
+    var factSec = document.getElementById("factures");
+    if(factSec) factSec.style.display="none";
   }
   // Show role badge in header
   var badge = document.getElementById("role-badge");
@@ -158,6 +162,7 @@ window.addEventListener("DOMContentLoaded",function(){
   <div class="tab" onclick="go('depenses',this)">DEPENSES</div>
   <div class="tab" onclick="go('coffre',this)">COFFRE</div>
   <div class="tab" onclick="go('credits',this)">CREDITS</div>
+  <div class="tab admin-only" onclick="go('factures',this)">FACTURES</div>
 </nav>
 <main>
 <div class="sec on" id="bilan">
@@ -240,6 +245,69 @@ window.addEventListener("DOMContentLoaded",function(){
     <div class="ts"><table><thead><tr><th>St.</th><th>Date</th><th>Client</th><th>Montant</th><th>Bar</th><th>Resp.</th><th>Avance</th><th>Rembourse</th><th>Reste</th></tr></thead><tbody id="cr-tb"></tbody></table></div>
   </div>
 </div>
+
+<div class="sec" id="factures">
+  <div class="kg">
+    <div class="kpi"><div class="kl">Fournisseur</div>
+      <select id="f-select" onchange="loadFactures()" style="width:100%;padding:8px;background:#161616;border:1px solid #333;border-radius:4px;color:#E2E2E2;font-size:13px;font-family:'DM Sans',sans-serif;margin-top:6px">
+        <option value="TOUS">Tous les fournisseurs</option>
+        <option value="BOUTIQUE">BOUTIQUE</option>
+        <option value="STAPP">STAPP</option>
+        <option value="LE BON COIN">LE BON COIN</option>
+        <option value="DIOUF">DIOUF</option>
+        <option value="GLACONS">GLACONS</option>
+        <option value="DIVERS">DIVERS</option>
+        <option value="IBS">IBS</option>
+      </select>
+    </div>
+    <div class="kpi g" id="f-count-kpi"><div class="kl">Factures</div><div class="kv" id="f-count">0</div><div class="ks">documents</div></div>
+  </div>
+
+  <!-- SCANNER -->
+  <div class="cc" style="margin-bottom:16px">
+    <div class="ct"><strong>Scanner une Facture</strong></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:11px;color:var(--mut);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Fournisseur</div>
+        <select id="f-upload-select" style="width:100%;padding:10px;background:#161616;border:1px solid #333;border-radius:4px;color:#E2E2E2;font-size:13px;font-family:'DM Sans',sans-serif">
+          <option value="BOUTIQUE">BOUTIQUE</option>
+          <option value="STAPP">STAPP</option>
+          <option value="LE BON COIN">LE BON COIN</option>
+          <option value="DIOUF">DIOUF</option>
+          <option value="GLACONS">GLACONS</option>
+          <option value="DIVERS">DIVERS</option>
+          <option value="IBS">IBS</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:11px;color:var(--mut);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Photo / PDF</div>
+        <input type="file" id="f-file" accept="image/*,application/pdf" capture="environment"
+          style="width:100%;padding:10px;background:#161616;border:1px solid #333;border-radius:4px;color:#E2E2E2;font-size:12px;font-family:'DM Sans',sans-serif">
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="height:26px"></div>
+        <button onclick="uploadFacture()" id="f-upload-btn"
+          style="padding:10px 24px;background:rgba(201,168,76,.15);border:1px solid #5A4010;border-radius:4px;color:#C9A84C;font-size:12px;letter-spacing:2px;cursor:pointer;font-family:'DM Sans',sans-serif;text-transform:uppercase;white-space:nowrap">
+          &#128247; Envoyer
+        </button>
+      </div>
+    </div>
+    <!-- Preview -->
+    <div id="f-preview" style="margin-top:14px;display:none">
+      <img id="f-preview-img" style="max-width:200px;max-height:200px;border-radius:6px;border:1px solid #333;object-fit:cover">
+    </div>
+    <div id="f-status" style="margin-top:10px;font-size:12px;color:var(--mut)"></div>
+  </div>
+
+  <!-- LISTE -->
+  <div class="tc">
+    <div class="th"><strong>Factures</strong><span id="f-loading" style="font-size:11px;color:var(--mut)">Chargement...</span></div>
+    <div id="f-list" style="padding:14px">
+      <div style="color:var(--mut);font-size:12px;text-align:center;padding:20px">Sélectionne un fournisseur</div>
+    </div>
+  </div>
+</div>
+
 </main>
 <script>
 var API1 = "https://script.google.com/macros/s/AKfycbwk3sP3ox1YeAhHMy6BT-RF7kEwbKFbSyqtG7OnMK-QEJNT5YkJYQxb4jY_mAyfC0P0Wg/exec?";
