@@ -210,7 +210,7 @@ window.addEventListener("DOMContentLoaded",function(){
   </div>
   <div id="d-recap"></div>
   <div class="tc"><div class="th"><strong>Salaires et Charges</strong></div>
-    <div class="ts"><table><thead><tr><th>Employe</th><th>Avance</th><th>Salaire</th><th>IBS</th><th>Boutique</th><th>STAPP</th><th>Le Bon Coin</th><th>Glacons</th><th>Loyer</th><th>Divers</th></tr></thead><tbody id="d-sal"></tbody></table></div>
+    <div class="ts"><table><thead><tr><th>Employe</th><th>Salaire</th><th>IBS</th><th>Boutique</th><th>STAPP</th><th>Le Bon Coin</th><th>Glacons</th><th>Loyer</th><th>Divers</th></tr></thead><tbody id="d-sal"></tbody></table></div>
   </div>
   <div id="d-divers"></div>
   <div id="dw-0" style="display:none"></div>
@@ -708,7 +708,6 @@ function renderDepenses(){
     kpi("o","Boissons",fmtM(DT.totalBoissons),"STAPP + LBC")+
     kpi("","Salaires",fmt(DT.salaires),"FCFA")+
     kpi("b","Loyer",fmt(DT.loyer),"FCFA")+
-    kpi("","Avances",fmt(DT.avances),"FCFA")+
     kpi("","Divers",fmt(DT.divers),"FCFA");
 
   // Chart
@@ -747,7 +746,6 @@ function renderDepenses(){
   document.getElementById("d-sal").innerHTML=
     D.employees.map(function(e){
       return "<tr><td>"+e.nom+"</td>"+
-        "<td>"+h(e.avance)+"</td>"+
         "<td>"+h(e.salaire)+"</td>"+
         "<td>"+h(e.ibs)+"</td>"+
         "<td>"+h(e.boutique)+"</td>"+
@@ -759,7 +757,7 @@ function renderDepenses(){
         "</tr>";
     }).join("")+
     '<tr class="gt"><td>TOTAL</td>'+
-    "<td>"+fmt(DT.avances)+"</td><td>"+fmt(DT.salaires)+"</td><td>"+fmt(DT.ibs)+"</td>"+
+    "<td>"+fmt(DT.salaires)+"</td><td>"+fmt(DT.ibs)+"</td>"+
     "<td>"+fmt(DT.boutique)+"</td><td>"+fmt(DT.stapp)+"</td><td>"+fmt(DT.lbc)+"</td>"+
     "<td>"+fmt(DT.glacons)+"</td><td>"+fmt(DT.loyer)+"</td><td>"+fmt(DT.divers)+"</td></tr>";
 
